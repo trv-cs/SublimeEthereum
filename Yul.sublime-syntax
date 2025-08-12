@@ -1,0 +1,66 @@
+%YAML 1.2
+---
+name: Yul
+file_extensions: [yul, yulp]
+scope: source.yul
+
+contexts:
+  main:
+    - include: comments
+    - include: keywords
+    - include: numbers
+    - include: strings
+    - include: operators
+    - include: identifiers
+
+  comments:
+    - match: //.*
+      scope: comment.line.yul
+    - match: /\*
+      scope: punctuation.definition.comment.begin.yul
+      push:
+        - meta_scope: comment.block.yul
+        - match: \*/
+          scope: punctuation.definition.comment.end.yul
+          pop: true
+
+  keywords:
+    - match: \b(object|code|data)\b
+      scope: keyword.declaration.yul
+    - match: \b(let|for|if|switch|case|default)\b
+      scope: keyword.control.yul
+    - match: \b(function|return)\b
+      scope: keyword.declaration.function.yul
+    - match: \b(true|false)\b
+      scope: constant.language.yul
+
+  operators:
+    - match: ':='
+      scope: keyword.operator.assignment.yul
+    - match: '[\+\-\*/\%]'
+      scope: keyword.operator.arithmetic.yul
+    - match: '[&|^~]'
+      scope: keyword.operator.bitwise.yul
+    - match: '[<>=!]'
+      scope: keyword.operator.comparison.yul
+
+  numbers:
+    - match: '\b0[xX][0-9a-fA-F]+\b'
+      scope: constant.numeric.hex.yul
+    - match: '\b\d+\b'
+      scope: constant.numeric.decimal.yul
+
+  strings:
+    - match: '"'
+      scope: punctuation.definition.string.begin.yul
+      push:
+        - meta_scope: string.quoted.double.yul
+        - match: '"'
+          scope: punctuation.definition.string.end.yul
+          pop: true
+        - match: '\\.'
+          scope: constant.character.escape.yul
+
+  identifiers:
+    - match: '\b[A-Za-z_][A-Za-z0-9_]*\b'
+      scope: variable.other.yul

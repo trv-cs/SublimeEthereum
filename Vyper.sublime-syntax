@@ -1,0 +1,95 @@
+%YAML 1.2
+---
+name: Vyper
+file_extensions: [vy]
+scope: source.vyper
+
+contexts:
+  main:
+    - include: comments
+    - include: keywords
+    - include: numbers
+    - include: strings
+    - include: operators
+    - include: functions
+    - include: types
+    - include: identifiers
+
+  comments:
+    - match: '#.*'
+      scope: comment.line.vyper
+    - match: '"""'
+      scope: punctuation.definition.comment.begin.vyper
+      push:
+        - meta_scope: comment.block.vyper
+        - match: '"""'
+          scope: punctuation.definition.comment.end.vyper
+          pop: true
+
+  keywords:
+    - match: \b(event|indexed|struct|interface|implements|from|import|as)\b
+      scope: keyword.declaration.vyper
+    - match: \b(if|else|elif|for|while|break|continue|pass|return|raise|assert)\b
+      scope: keyword.control.vyper
+    - match: \b(def|class)\b
+      scope: keyword.declaration.function.vyper
+    - match: \b(public|private|internal|external|view|pure|payable|nonpayable|constant|immutable)\b
+      scope: storage.modifier.vyper
+    - match: \b(True|False|None)\b
+      scope: constant.language.vyper
+    - match: '@\w+'
+      scope: entity.name.decorator.vyper
+
+  types:
+    - match: \b(uint256|int256|int128|uint128|address|bytes32|bytes|string|bool|decimal)\b
+      scope: storage.type.vyper
+    - match: \b(HashMap|DynArray|public|constant|immutable)\b
+      scope: storage.type.vyper
+
+  functions:
+    - match: '\b(def)\s+([A-Za-z_]\w*)\s*\('
+      captures:
+        1: keyword.declaration.function.vyper
+        2: entity.name.function.vyper
+
+  operators:
+    - match: '[\+\-\*/\%\*\*]'
+      scope: keyword.operator.arithmetic.vyper
+    - match: '[&|^~<<>>]'
+      scope: keyword.operator.bitwise.vyper
+    - match: '[<>=!]=?'
+      scope: keyword.operator.comparison.vyper
+    - match: '\b(and|or|not|in|is)\b'
+      scope: keyword.operator.logical.vyper
+    - match: '='
+      scope: keyword.operator.assignment.vyper
+
+  numbers:
+    - match: '\b0[xX][0-9a-fA-F]+\b'
+      scope: constant.numeric.hex.vyper
+    - match: '\b\d+\.?\d*([eE][+-]?\d+)?\b'
+      scope: constant.numeric.decimal.vyper
+
+  strings:
+    - match: '"'
+      scope: punctuation.definition.string.begin.vyper
+      push:
+        - meta_scope: string.quoted.double.vyper
+        - match: '"'
+          scope: punctuation.definition.string.end.vyper
+          pop: true
+        - match: '\\.'
+          scope: constant.character.escape.vyper
+    - match: "'"
+      scope: punctuation.definition.string.begin.vyper
+      push:
+        - meta_scope: string.quoted.single.vyper
+        - match: "'"
+          scope: punctuation.definition.string.end.vyper
+          pop: true
+        - match: '\\.'
+          scope: constant.character.escape.vyper
+
+  identifiers:
+    - match: '\b[A-Za-z_][A-Za-z0-9_]*\b'
+      scope: variable.other.vyper
