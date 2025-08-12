@@ -122,11 +122,19 @@ contexts:
     - include: contract
     - include: struct
     - include: function
+    - include: constructor
+    - include: receive_and_fallback
     - include: error
     - include: using-directive
     - include: user-defined-type
     - include: assembly
     - include: variables
+    - include: modifier
+    - include: event
+    - include: control-structure
+    - include: enum
+    - include: curly-brackets-body-contents
+    - include: expression-include
 
   prototype:
     - include: comments
@@ -487,6 +495,7 @@ contexts:
     - include: if-statement
     - include: while-loop
     - include: for-loop
+    - include: do-while-loop
     - include: try-catch
 
   while-loop:
@@ -495,10 +504,19 @@ contexts:
       push:
         - control-structure-body
         - expression-in-brackets
+
+  do-while-loop:
     - match: \bdo\b
       scope: keyword
       push:
+        - do-while-condition
         - control-structure-body
+
+  do-while-condition:
+    - match: \bwhile\b
+      scope: keyword
+      push: expression-in-brackets
+    - include: else-pop
 
   if-statement:
     - include: else-if-statement
@@ -601,6 +619,8 @@ contexts:
       scope: keyword
     - match: '{{expression_keyword_binary_logic}}'
       scope: constant.language
+    - match: '\b(delete)\b'
+      scope: keyword
     - match: '{{special_members_keywords}}'
       captures:
         1: storage.type
@@ -840,6 +860,13 @@ contexts:
         - function-returns-declaration
         - function-modifiers
         - function-arguments-try
+    - match: \b(modifier)\b
+      scope: keyword.declaration.modifier
+      push:
+        - curly-brackets-body
+        - function-returns-declaration
+        - function-modifiers
+        - function-arguments-try
 
   function-arguments-try:
     - include: function-arguments
@@ -966,8 +993,9 @@ contexts:
           pop: true
 
   curly-brackets-body-contents:
-    - match: \b_;
-      scope: keyword
+    - match: \b(_)\s*;
+      captures:
+        1: keyword
     - include: curly-brackets-body-include
     - include: return-statement
     - include: lvalue-statement
@@ -978,7 +1006,7 @@ contexts:
     - include: variables
     - include: emit-event
     - include: unchecked-arithmetic
-    - match: \bcontinue|break\b
+    - match: \b(continue|break)\b
       scope: keyword
     - include: expression-include
 
@@ -1078,11 +1106,16 @@ contexts:
       pop: true
 
   assembly-body-contents:
+    - include: comments
     - include: assembly-function
     - include: string-literals
-    - include: assembly-statements
-    - include: assembly-body-include
-    - include: assembly-end-bracket
+    - include: assembly-statements  
+    - match: '\{'
+      scope: punctuation.section.block.begin.sol
+      push: assembly-body-contents
+    - match: '\}'
+      scope: punctuation.section.block.end
+      pop: true
 
   assembly-function:
     - match: \b(function)\s+({{identifier}})
@@ -1101,17 +1134,16 @@ contexts:
 
   assembly-statements:
     - match: '\:\='
-      scope: keyword
+      scope: keyword.operator.assignment
     - match: '\b({{assembly_keywords}})\b'
       scope: keyword
     - include: assembly-opcode
+    - include: assembly-function-call
     - match: '{{math_operator}}'
       scope: keyword.operator.arithmetic
     - include: hex_number
     - include: number
     - include: string
-    - include: assembly-function-call
-    - match: '{{identifier}}'
     - match: '{{expression_keyword_main}}'
       scope: keyword
     - match: '{{comparison_operator}}'
@@ -1120,9 +1152,14 @@ contexts:
       scope: keyword.operator.logical
     - match: '{{assembly_operators}}'
       scope: keyword
+    - match: '\b({{identifier}})\s*(?=\()'
+      scope: support.function
+    - match: '{{identifier}}'
 
   assembly-opcode:
     - match: '\b({{opcode}})\b'
+      scope: support.function
+    - match: '\b(sstore|sload|mstore|mload|caller|return)\s*(?=\()'
       scope: support.function
       # Note: Update opcode list as needed for newer EVM versions.
 
